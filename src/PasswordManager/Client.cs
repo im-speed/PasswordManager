@@ -8,6 +8,9 @@ public class Client()
 {
     public SecretKey SecretKey { get; set; } = new();
 
+    /// <summary>
+    /// Creates a client by reading it from a json file.
+    /// </summary>
     internal static Client ReadFromFile(string path)
     {
         JsonClient jsonClient = JsonSerializer.Deserialize<JsonClient>(
@@ -20,6 +23,9 @@ public class Client()
         };
     }
 
+    /// <summary>
+    /// Writes the client to a json file, overwriting it if it already exists.
+    /// </summary>
     public void WriteToFile(string path)
     {
         JsonClient jsonClient = new()

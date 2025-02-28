@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography;
-using System.Text.Json;
-using PasswordManager.Keys;
+﻿using PasswordManager.Keys;
 
 namespace PasswordManager;
 
@@ -32,6 +30,10 @@ public static class Program
         command(commandArgs);
     }
 
+    /// <summary>
+    /// Prompts the user for a password and returns it.
+    /// </summary>
+    /// <param name="prompt">The prompt to display before reading the password.</param>
     static string GetPassword(string prompt = "Enter password: ")
     {
         while (true)

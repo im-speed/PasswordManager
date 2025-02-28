@@ -10,6 +10,11 @@ public class Vault
 
     public void Set(string prop, string password) => Values[prop] = password;
 
+    /// <summary>
+    /// Encrypts the vault into a string.
+    /// </summary>
+    /// <param name="Key">The key used to encrypt the vault.</param>
+    /// <param name="IV">The initialization vector used to encrypt the vault.</param>
     public string Encrypt(VaultKey Key, byte[] IV)
     {
         byte[] encryptedVault;
@@ -36,6 +41,12 @@ public class Vault
         return Convert.ToBase64String(encryptedVault);
     }
 
+    /// <summary>
+    /// Decrypts the vault from a byte array.
+    /// </summary>
+    /// <param name="encryptedVault">The byte array vault.</param>
+    /// <param name="Key">The key used to encrypt the vault.</param>
+    /// <param name="IV">The initialization vector used to encrypt the vault.</param>
     public static Vault Decrypt(byte[] encryptedVault, VaultKey Key, byte[] IV)
     {
         string vaultJson;

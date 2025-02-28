@@ -11,17 +11,10 @@ public class Server()
 
     public Vault Vault { get; set; } = new();
 
-    public void WriteToFile(string path, VaultKey vaultKey)
-    {
-        JsonServer jsonServer = new()
-        {
-            IV = Convert.ToBase64String(IV),
-            Vault = Vault.Encrypt(vaultKey, IV)
-        };
-
-        File.WriteAllText(path, JsonSerializer.Serialize(jsonServer));
-    }
-
+    /// <summary>
+    /// Creates a server by reading it from a json file.
+    /// </summary>
+    /// <param name="vaultKey">The key used to decrypt the vault.</param>
     public static Server ReadFromFile(string path, VaultKey vaultKey)
     {
         JsonServer? jsonServer = JsonSerializer.Deserialize<JsonServer>(
@@ -36,5 +29,20 @@ public class Server()
             IV = IV,
             Vault = Vault.Decrypt(encryptedVault, vaultKey, IV)
         };
+    }
+
+    /// <summary>
+    /// Writes the server to a json file, overwriting it if it already exists.
+    /// </summary>
+    /// <param name="vaultKey">The key used to encrypt the vault.</param>
+    public void WriteToFile(string path, VaultKey vaultKey)
+    {
+        JsonServer jsonServer = new()
+        {
+            IV = Convert.ToBase64String(IV),
+            Vault = Vault.Encrypt(vaultKey, IV)
+        };
+
+        File.WriteAllText(path, JsonSerializer.Serialize(jsonServer));
     }
 }
