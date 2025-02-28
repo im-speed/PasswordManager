@@ -59,31 +59,28 @@ public static class Program
 
         string masterPassword = GetMasterPassword();
 
-        byte[] secretKey = new byte[16];
-        byte[] IV = new byte[16];
+        byte[] secretKeyBytes = new byte[16];
         using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
         {
-            rng.GetBytes(secretKey);
-            rng.GetBytes(IV);
+            rng.GetBytes(secretKeyBytes);
         }
+        string secretKey = Convert.ToBase64String(secretKeyBytes);
 
-        Console.WriteLine("Secret key: " + Convert.ToBase64String(secretKey));
+        Console.WriteLine("Secret key: " + secretKey);
 
         byte[] vaultKey = new Rfc2898DeriveBytes(
-            masterPassword, secretKey, 10000, HashAlgorithmName.SHA256
+            masterPassword, secretKeyBytes, 10000, HashAlgorithmName.SHA256
         ).GetBytes(16);
 
-        Console.WriteLine(Convert.ToBase64String(vaultKey));
-
-        Client client = new(Convert.ToBase64String(secretKey));
+        Client client = new(secretKey);
         client.WriteToFile(clientPath);
 
-        using (Aes aesAlg = Aes.Create())
-        {
-            aesAlg.Key = vaultKey;
-            aesAlg.IV = IV;
-        }
+        Aes aesAlg = Aes.Create();
+        aesAlg.Key = vaultKey;
+        aesAlg.GenerateIV();
+        string IV = Convert.ToBase64String(aesAlg.IV);
 
-        Console.WriteLine(Convert.ToBase64String(IV));
+        Server server = new(IV);
+        server.WriteToFile(serverPath);
     }
 }
