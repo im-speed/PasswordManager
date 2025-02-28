@@ -1,12 +1,12 @@
 ﻿namespace PasswordManager;
 
-class Program
+public static class Program
 {
     static Dictionary<string, Action<string[]>> Commands { get; } = new()
     {
     };
 
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         if (args.Length == 0)
         {
