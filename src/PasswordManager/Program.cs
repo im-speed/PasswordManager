@@ -6,7 +6,8 @@ public static class Program
 {
     static Dictionary<string, Action<string[]>> Commands { get; } = new()
     {
-        { "init", Init }
+        { "init", Init },
+        { "set", Set },
     };
 
     public static void Main(string[] args)
@@ -29,20 +30,20 @@ public static class Program
         command(commandArgs);
     }
 
-    static string GetMasterPassword()
+    static string GetPassword(string prompt = "Enter master password: ")
     {
         while (true)
         {
-            Console.WriteLine("Enter master password: ");
-            string? masterPassword = Console.ReadLine();
+            Console.WriteLine(prompt);
+            string? password = Console.ReadLine();
 
-            if (string.IsNullOrEmpty(masterPassword))
+            if (string.IsNullOrEmpty(password))
             {
                 Console.WriteLine("No password provided.");
                 continue;
             }
 
-            return masterPassword;
+            return password;
         }
     }
 
@@ -57,7 +58,7 @@ public static class Program
         string clientPath = args[0];
         string serverPath = args[1];
 
-        string masterPassword = GetMasterPassword();
+        string masterPassword = GetPassword("Enter master password: ");
 
         byte[] secretKeyBytes = new byte[16];
         using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
@@ -77,10 +78,58 @@ public static class Program
 
         Aes aesAlg = Aes.Create();
         aesAlg.Key = vaultKey;
-        aesAlg.GenerateIV();
         string IV = Convert.ToBase64String(aesAlg.IV);
 
         Server server = new(IV);
-        server.WriteToFile(serverPath);
+        server.WriteToFile(serverPath, vaultKey);
+    }
+
+    static void Set(string[] args)
+    {
+        if (args.Length < 3)
+        {
+            Console.WriteLine(
+                "Not enough arguments. Usage: set <client> <server> <prop>"
+            );
+            return;
+        }
+
+        bool shouldGenerate = false;
+        if (args.Length > 3)
+        {
+            shouldGenerate = args[3] == "-g" || args[3] == "--generate";
+        }
+
+        string masterPassword = GetPassword("Enter master password: ");
+
+        string password = "";
+        if (shouldGenerate)
+        {
+            password = "pnasfasnifa";
+        }
+        else
+        {
+            password = GetPassword("Enter password: ");
+        }
+
+        string clientPath = args[0];
+        string serverPath = args[1];
+        string prop = args[2];
+
+        Client client = Client.ReadFromFile(clientPath);
+
+        byte[] vaultKey = new Rfc2898DeriveBytes(
+            masterPassword, Convert.FromBase64String(client.SecretKey), 10000, HashAlgorithmName.SHA256
+        ).GetBytes(16);
+
+        Server server = Server.ReadFromFile(serverPath, vaultKey);
+
+        Aes aesAlg = Aes.Create();
+        aesAlg.Key = vaultKey;
+        aesAlg.IV = Convert.FromBase64String(server.IV);
+
+        server.Vault.Set(prop, password);
+
+        server.WriteToFile(serverPath, vaultKey);
     }
 }
