@@ -1,4 +1,6 @@
 ﻿using System.Security.Cryptography;
+using System.Text.Json;
+using PasswordManager.Keys;
 
 namespace PasswordManager;
 
@@ -30,7 +32,7 @@ public static class Program
         command(commandArgs);
     }
 
-    static string GetPassword(string prompt = "Enter master password: ")
+    static string GetPassword(string prompt = "Enter password: ")
     {
         while (true)
         {
@@ -60,27 +62,19 @@ public static class Program
 
         string masterPassword = GetPassword("Enter master password: ");
 
-        byte[] secretKeyBytes = new byte[16];
-        using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+        SecretKey secretKey = new();
+
+        Console.WriteLine("Your secret key: " + secretKey);
+
+        VaultKey vaultKey = new(masterPassword, secretKey);
+
+        Client client = new()
         {
-            rng.GetBytes(secretKeyBytes);
-        }
-        string secretKey = Convert.ToBase64String(secretKeyBytes);
-
-        Console.WriteLine("Secret key: " + secretKey);
-
-        byte[] vaultKey = new Rfc2898DeriveBytes(
-            masterPassword, secretKeyBytes, 10000, HashAlgorithmName.SHA256
-        ).GetBytes(16);
-
-        Client client = new(secretKey);
+            SecretKey = secretKey
+        };
         client.WriteToFile(clientPath);
 
-        Aes aesAlg = Aes.Create();
-        aesAlg.Key = vaultKey;
-        string IV = Convert.ToBase64String(aesAlg.IV);
-
-        Server server = new(IV);
+        Server server = new();
         server.WriteToFile(serverPath, vaultKey);
     }
 
@@ -102,14 +96,14 @@ public static class Program
 
         string masterPassword = GetPassword("Enter master password: ");
 
-        string password = "";
+        string password;
         if (shouldGenerate)
         {
             password = "pnasfasnifa";
         }
         else
         {
-            password = GetPassword("Enter password: ");
+            password = GetPassword();
         }
 
         string clientPath = args[0];
@@ -118,15 +112,9 @@ public static class Program
 
         Client client = Client.ReadFromFile(clientPath);
 
-        byte[] vaultKey = new Rfc2898DeriveBytes(
-            masterPassword, Convert.FromBase64String(client.SecretKey), 10000, HashAlgorithmName.SHA256
-        ).GetBytes(16);
+        VaultKey vaultKey = new(masterPassword, client.SecretKey);
 
         Server server = Server.ReadFromFile(serverPath, vaultKey);
-
-        Aes aesAlg = Aes.Create();
-        aesAlg.Key = vaultKey;
-        aesAlg.IV = Convert.FromBase64String(server.IV);
 
         server.Vault.Set(prop, password);
 

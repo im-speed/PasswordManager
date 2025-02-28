@@ -1,26 +1,24 @@
-using System;
 using System.Security.Cryptography;
 using System.Text.Json;
+using PasswordManager.Keys;
 
 namespace PasswordManager;
 
 public class Vault
 {
-    public Dictionary<string, string> Values { get; } = [];
+    public Dictionary<string, string> Values { get; set; } = [];
 
-    public void Set(string key, string value) => Values[key] = value;
+    public void Set(string prop, string password) => Values[prop] = password;
 
-    public byte[] Encrypt(byte[] Key, byte[] IV)
+    public string Encrypt(VaultKey Key, byte[] IV)
     {
         byte[] encryptedVault;
 
         string vaultJson = JsonSerializer.Serialize(Values);
 
-        Console.WriteLine(vaultJson);
-
         using (Aes aesAlg = Aes.Create())
         {
-            aesAlg.Key = Key;
+            aesAlg.Key = Key.Bytes;
             aesAlg.IV = IV;
 
             ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
@@ -35,15 +33,15 @@ public class Vault
             encryptedVault = msEncrypt.ToArray();
         }
 
-        return encryptedVault;
+        return Convert.ToBase64String(encryptedVault);
     }
 
-    public static Vault Decrypt(byte[] encryptedVault, byte[] Key, byte[] IV)
+    public static Vault Decrypt(byte[] encryptedVault, VaultKey Key, byte[] IV)
     {
         string vaultJson;
         using (Aes aesAlg = Aes.Create())
         {
-            aesAlg.Key = Key;
+            aesAlg.Key = Key.Bytes;
             aesAlg.IV = IV;
 
             ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
@@ -55,8 +53,9 @@ public class Vault
             vaultJson = srDecrypt.ReadToEnd();
         }
 
-        Console.WriteLine(vaultJson);
-
-        return JsonSerializer.Deserialize<Vault>(vaultJson)!;
+        return new()
+        {
+            Values = JsonSerializer.Deserialize<Dictionary<string, string>>(vaultJson)!
+        };
     }
 }

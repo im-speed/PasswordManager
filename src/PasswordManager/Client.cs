@@ -1,21 +1,31 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using PasswordManager.JsonClasses;
+using PasswordManager.Keys;
 
 namespace PasswordManager;
 
-public class Client(string secretKey)
+public class Client()
 {
-    [JsonPropertyName("secretKey")]
-    public string SecretKey { get; set; } = secretKey;
+    public SecretKey SecretKey { get; set; } = new();
 
-    internal static Client ReadFromFile(string clientPath)
+    internal static Client ReadFromFile(string path)
     {
-        return
-            JsonSerializer.Deserialize<Client>(File.ReadAllText(clientPath))!;
+        JsonClient jsonClient = JsonSerializer.Deserialize<JsonClient>(
+            File.ReadAllText(path)
+        )!;
+
+        return new()
+        {
+            SecretKey = new(Convert.FromBase64String(jsonClient.SecretKey))
+        };
     }
 
     public void WriteToFile(string path)
     {
-        File.WriteAllText(path, JsonSerializer.Serialize(this));
+        JsonClient jsonClient = new()
+        {
+            SecretKey = SecretKey.String
+        };
+        File.WriteAllText(path, JsonSerializer.Serialize(jsonClient));
     }
 }

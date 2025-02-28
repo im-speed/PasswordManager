@@ -1,44 +1,40 @@
+using System.Security.Cryptography;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using PasswordManager.JsonClasses;
+using PasswordManager.Keys;
 
 namespace PasswordManager;
 
-public class Server(string IV)
+public class Server()
 {
-    public string IV { get; set; } = IV;
+    public byte[] IV { get; set; } = Aes.Create().IV;
 
-    [JsonPropertyName("vault")]
-    public string EncryptedVault { get; set; } = "";
-
-    [JsonIgnore]
     public Vault Vault { get; set; } = new();
 
-    public void WriteToFile(string path, byte[] vaultKey)
+    public void WriteToFile(string path, VaultKey vaultKey)
     {
-        EncryptedVault = Convert.ToBase64String(Vault.Encrypt(vaultKey, Convert.FromBase64String(IV)));
-        File.WriteAllText(path, JsonSerializer.Serialize(this));
+        JsonServer jsonServer = new()
+        {
+            IV = Convert.ToBase64String(IV),
+            Vault = Vault.Encrypt(vaultKey, IV)
+        };
+
+        File.WriteAllText(path, JsonSerializer.Serialize(jsonServer));
     }
 
-    public static Server ReadFromFile(string path, byte[] vaultKey)
+    public static Server ReadFromFile(string path, VaultKey vaultKey)
     {
-        Server server = JsonSerializer.Deserialize<Server>(File.ReadAllText(path))!;
+        JsonServer? jsonServer = JsonSerializer.Deserialize<JsonServer>(
+            File.ReadAllText(path)
+        )!;
 
-        if (server.EncryptedVault == "")
+        byte[] IV = Convert.FromBase64String(jsonServer.IV);
+        byte[] encryptedVault = Convert.FromBase64String(jsonServer.Vault);
+
+        return new()
         {
-            return server;
-        }
-
-        server.Vault = Vault.Decrypt(
-            Convert.FromBase64String(server.EncryptedVault),
-            vaultKey,
-            Convert.FromBase64String(server.IV)
-        );
-
-        foreach (KeyValuePair<string, string> pair in server.Vault.Values)
-        {
-            Console.WriteLine(pair.Key + ": " + pair.Value);
-        }
-
-        return server;
+            IV = IV,
+            Vault = Vault.Decrypt(encryptedVault, vaultKey, IV)
+        };
     }
 }
