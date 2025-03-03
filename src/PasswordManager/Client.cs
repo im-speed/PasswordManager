@@ -11,11 +11,18 @@ public class Client()
     /// <summary>
     /// Creates a client by reading it from a json file.
     /// </summary>
-    internal static Client ReadFromFile(string path)
+    internal static Client? ReadFromFile(string path)
     {
-        JsonClient jsonClient = JsonSerializer.Deserialize<JsonClient>(
-            File.ReadAllText(path)
-        )!;
+        JsonClient jsonClient;
+        try
+        {
+            jsonClient = JsonSerializer.Deserialize<JsonClient>(File.ReadAllText(path))!;
+        }
+        catch (Exception)
+        {
+            Console.WriteLine("Failed to read client from file. Try running 'init' or 'create'.");
+            return null;
+        }
 
         return new()
         {

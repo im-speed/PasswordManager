@@ -84,9 +84,7 @@ public static class Program
     {
         if (args.Length < 3)
         {
-            Console.WriteLine(
-                "Not enough arguments. Usage: set <client> <server> <prop>"
-            );
+            Console.WriteLine("Not enough arguments. Usage: set <client> <server> <prop>");
             return;
         }
 
@@ -101,6 +99,7 @@ public static class Program
         string password;
         if (shouldGenerate)
         {
+            // TODO: Generate password
             password = "pnasfasnifa";
         }
         else
@@ -112,14 +111,14 @@ public static class Program
         string serverPath = args[1];
         string prop = args[2];
 
-        Client client = Client.ReadFromFile(clientPath);
+        Client? client = Client.ReadFromFile(clientPath);
+        if (client == null) return;
 
         VaultKey vaultKey = new(masterPassword, client.SecretKey);
-
-        Server server = Server.ReadFromFile(serverPath, vaultKey);
+        Server? server = Server.ReadFromFile(serverPath, vaultKey);
+        if (server == null) return;
 
         server.Vault.Set(prop, password);
-
         server.WriteToFile(serverPath, vaultKey);
     }
 }

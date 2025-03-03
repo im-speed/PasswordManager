@@ -51,9 +51,9 @@ public class Vault
     /// <param name="encryptedVault">The byte array vault.</param>
     /// <param name="Key">The key used to encrypt the vault.</param>
     /// <param name="IV">The initialization vector used to encrypt the vault.</param>
-    public static Vault Decrypt(byte[] encryptedVault, VaultKey Key, byte[] IV)
+    public static Vault? Decrypt(byte[] encryptedVault, VaultKey Key, byte[] IV)
     {
-        string vaultJson;
+        Dictionary<string, string> decryptedValues;
         using (Aes aesAlg = Aes.Create())
         {
             aesAlg.Key = Key.Bytes;
@@ -65,12 +65,20 @@ public class Vault
             using CryptoStream csDecrypt = new(msDecrypt, decryptor, CryptoStreamMode.Read);
             using StreamReader srDecrypt = new(csDecrypt);
 
-            vaultJson = srDecrypt.ReadToEnd();
+            try
+            {
+                decryptedValues = JsonSerializer.Deserialize<Dictionary<string, string>>(srDecrypt.ReadToEnd())!;
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Failed to decrypt vault. Master password or secret key may be incorrect.");
+                return null;
+            }
         }
 
         return new()
         {
-            Values = JsonSerializer.Deserialize<Dictionary<string, string>>(vaultJson)!
+            Values = decryptedValues
         };
     }
 }

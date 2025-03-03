@@ -15,19 +15,30 @@ public class Server()
     /// Creates a server by reading it from a json file.
     /// </summary>
     /// <param name="vaultKey">The key used to decrypt the vault.</param>
-    public static Server ReadFromFile(string path, VaultKey vaultKey)
+    public static Server? ReadFromFile(string path, VaultKey vaultKey)
     {
-        JsonServer? jsonServer = JsonSerializer.Deserialize<JsonServer>(
-            File.ReadAllText(path)
-        )!;
+        JsonServer jsonServer;
+        try
+        {
+            jsonServer = JsonSerializer.Deserialize<JsonServer>(File.ReadAllText(path))!;
+        }
+        catch (Exception)
+        {
+            Console.WriteLine("Failed to read server from file. Try running 'init'.");
+            return null;
+        }
+
 
         byte[] IV = Convert.FromBase64String(jsonServer.IV);
         byte[] encryptedVault = Convert.FromBase64String(jsonServer.Vault);
 
+        Vault? vault = Vault.Decrypt(encryptedVault, vaultKey, IV);
+        if (vault == null) return null;
+
         return new()
         {
             IV = IV,
-            Vault = Vault.Decrypt(encryptedVault, vaultKey, IV)
+            Vault = vault
         };
     }
 
