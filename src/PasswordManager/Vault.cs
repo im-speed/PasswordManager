@@ -4,6 +4,10 @@ using PasswordManager.Keys;
 
 namespace PasswordManager;
 
+/// <summary>
+/// A encryptable vault of passwords.
+/// </summary>
+/// <see cref="https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.aes?view=net-6.0"/>
 public class Vault
 {
     public Dictionary<string, string> Values { get; set; } = [];
