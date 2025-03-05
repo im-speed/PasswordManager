@@ -1,9 +1,12 @@
-﻿using PasswordManager.Keys;
+﻿using System.Security.Cryptography;
+using PasswordManager.Keys;
 
 namespace PasswordManager;
 
 public static class Program
 {
+    static readonly string alphaNumerics = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
     static Dictionary<string, Action<string[]>> Commands { get; } = new()
     {
         { "init", Init },
@@ -99,8 +102,8 @@ public static class Program
         string password;
         if (shouldGenerate)
         {
-            // TODO: Generate password
-            password = "pnasfasnifa";
+            password = RandomNumberGenerator.GetString(alphaNumerics, 20);
+            Console.WriteLine("Generated password: " + password);
         }
         else
         {
