@@ -199,6 +199,24 @@ public class IntegrationTests
         Assert.IsFalse(prop2Response.Contains(data2), "The command 'get' must not retrieve dropped values.");
     }
 
+    [TestMethod]
+    public void ChangeCommandChangesMasterPassword()
+    {
+        string pwd2 = "password123";
+        string prop = "some arbitrary prop";
+        string data = "some arbitrary data";
+
+        init(clientPath1, serverPath, pwd1);
+        set(clientPath1, serverPath, pwd1, prop, data);
+        change(clientPath1, serverPath, pwd1, pwd2);
+
+        string response1 = get(clientPath1, serverPath, pwd2, prop).Split(Environment.NewLine)[^1];
+        Assert.AreEqual(data, response1, "Could not retrieve data with new master password after changing.");
+
+        string response2 = get(clientPath1, serverPath, pwd1, prop).Split(Environment.NewLine)[^1];
+        Assert.AreNotEqual(data, response2, "Could retrieve data with old master password after changing.");
+    }
+
 
     ///
     /// Domain-specific language (DSL) to simplify testing:
@@ -283,6 +301,14 @@ public class IntegrationTests
         resetConsoleOutput();
         setConsoleInput(pwd);
         run("delete", clientPath, serverPath, prop);
+        return getConsoleOutput().Trim();
+    }
+
+    private string change(string clientPath, string serverPath, string pwd1, string pwd2)
+    {
+        resetConsoleOutput();
+        setConsoleInput(pwd1, pwd2);
+        run("change", clientPath, serverPath);
         return getConsoleOutput().Trim();
     }
 
