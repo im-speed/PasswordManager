@@ -14,6 +14,19 @@ public class Vault
 
     public void Set(string prop, string password) => Values[prop] = password;
 
+    public string? Get(string prop)
+    {
+        if (Values.TryGetValue(prop, out string? value))
+        {
+            return value;
+        }
+        else
+        {
+            Console.WriteLine($"The property '{prop}' does not exist.");
+            return null;
+        }
+    }
+
     /// <summary>
     /// Encrypts the vault into a string.
     /// </summary>

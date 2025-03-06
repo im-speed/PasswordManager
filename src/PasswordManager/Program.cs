@@ -12,6 +12,7 @@ public static class Program
         { "init", Init },
         { "create", Create },
         { "set", Set },
+        { "get", Get },
     };
 
     public static void Main(string[] args)
@@ -154,5 +155,42 @@ public static class Program
 
         server.Vault.Set(prop, password);
         server.WriteToFile(serverPath, vaultKey);
+    }
+
+    static void Get(string[] args)
+    {
+        if (args.Length < 2)
+        {
+            Console.WriteLine("Not enough arguments. Usage: get <client> <server> [<prop>]");
+            return;
+        }
+
+        string clientPath = args[0];
+        string serverPath = args[1];
+        string? prop = args.Length > 2 ? args[2] : null;
+
+        string masterPassword = GetPassword("Enter your master password: ");
+
+        Client? client = Client.ReadFromFile(clientPath);
+        if (client == null) return;
+
+        VaultKey vaultKey = new(masterPassword, client.SecretKey);
+        Server? server = Server.ReadFromFile(serverPath, vaultKey);
+        if (server == null) return;
+
+        if (prop != null)
+        {
+            string? password = server.Vault.Get(prop);
+            if (password != null)
+            {
+                Console.WriteLine($"Password for {prop}: {password}");
+            }
+        }
+        else
+        {
+            SortedSet<string> properties = new(server.Vault.Values.Keys);
+            Console.WriteLine("Properties: ");
+            Console.WriteLine(string.Join("\n", properties));
+        }
     }
 }
