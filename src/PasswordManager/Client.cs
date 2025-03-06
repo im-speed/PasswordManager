@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using PasswordManager.JsonClasses;
 using PasswordManager.Keys;
@@ -26,7 +27,7 @@ public class Client()
 
         return new()
         {
-            SecretKey = new(Convert.FromBase64String(jsonClient.SecretKey))
+            SecretKey = new(Encoding.Unicode.GetBytes(jsonClient.SecretKey))
         };
     }
 

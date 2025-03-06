@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text;
 
 namespace PasswordManager.Keys;
 
@@ -22,5 +23,5 @@ public class SecretKey
         Bytes = secretKey;
     }
 
-    public override string ToString() => Convert.ToBase64String(Bytes);
+    public override string ToString() => Encoding.Unicode.GetString(Bytes);
 }

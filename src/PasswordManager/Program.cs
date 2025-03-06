@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using System.Text;
 using PasswordManager.Keys;
 
 namespace PasswordManager;
@@ -106,7 +107,7 @@ public static class Program
         string masterPassword = GetPassword("Enter your master password: ");
         string secretKeyInput = GetPassword("Enter your secret key: ", "No key provided.");
 
-        SecretKey secretKey = new(Convert.FromBase64String(secretKeyInput));
+        SecretKey secretKey = new(Encoding.Unicode.GetBytes(secretKeyInput));
         VaultKey vaultKey = new(masterPassword, secretKey);
         Server? server = Server.ReadFromFile(serverPath, vaultKey);
         if (server == null) return;

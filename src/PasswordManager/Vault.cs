@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using PasswordManager.Keys;
 
@@ -55,7 +56,7 @@ public class Vault
             encryptedVault = msEncrypt.ToArray();
         }
 
-        return Convert.ToBase64String(encryptedVault);
+        return Encoding.Unicode.GetString(encryptedVault);
     }
 
     /// <summary>
