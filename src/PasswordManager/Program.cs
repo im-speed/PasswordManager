@@ -245,9 +245,9 @@ public static class Program
 
     static void Change(string[] args)
     {
-        if (args.Length < 2)
+        if (args.Length != 2)
         {
-            Console.WriteLine("Not enough arguments. Usage: change <client> <server>");
+            Console.WriteLine("Incorrect amount of arguments. Usage: change <client> <server>");
             return;
         }
 
