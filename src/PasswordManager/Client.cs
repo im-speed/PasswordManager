@@ -37,7 +37,7 @@ public class Client()
     {
         JsonClient jsonClient = new()
         {
-            SecretKey = SecretKey.String
+            SecretKey = SecretKey.ToString()
         };
         File.WriteAllText(path, JsonSerializer.Serialize(jsonClient));
     }

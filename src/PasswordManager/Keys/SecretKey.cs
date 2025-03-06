@@ -5,7 +5,6 @@ namespace PasswordManager.Keys;
 public class SecretKey
 {
     public byte[] Bytes { get; }
-    public string String => Convert.ToBase64String(Bytes);
 
     public SecretKey()
     {
@@ -22,4 +21,6 @@ public class SecretKey
     {
         Bytes = secretKey;
     }
+
+    public override string ToString() => Convert.ToBase64String(Bytes);
 }

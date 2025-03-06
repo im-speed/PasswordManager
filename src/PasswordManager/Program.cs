@@ -240,7 +240,7 @@ public static class Program
         Client? client = Client.ReadFromFile(args[0]);
         if (client == null) return;
 
-        Console.WriteLine($"Secret key: {client.SecretKey.String}");
+        Console.WriteLine($"Secret key: {client.SecretKey}");
     }
 
     static void Change(string[] args)
