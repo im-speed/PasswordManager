@@ -30,8 +30,8 @@ public class Server()
         }
 
 
-        byte[] IV = Encoding.Unicode.GetBytes(jsonServer.IV);
-        byte[] encryptedVault = Encoding.Unicode.GetBytes(jsonServer.Vault);
+        byte[] IV = Convert.FromBase64String(jsonServer.IV);
+        byte[] encryptedVault = Convert.FromBase64String(jsonServer.Vault);
 
         Vault? vault = Vault.Decrypt(encryptedVault, vaultKey, IV);
         if (vault == null) return null;
@@ -51,7 +51,7 @@ public class Server()
     {
         JsonServer jsonServer = new()
         {
-            IV = Encoding.Unicode.GetString(IV),
+            IV = Convert.ToBase64String(IV),
             Vault = Vault.Encrypt(vaultKey, IV)
         };
 

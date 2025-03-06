@@ -79,7 +79,8 @@ public static class Program
 
         SecretKey secretKey = new();
 
-        Console.WriteLine("Your secret key: " + secretKey);
+        Console.WriteLine(secretKey);
+        Console.WriteLine("↑ Your secret key ↑");
 
         VaultKey vaultKey = new(masterPassword, secretKey);
 
@@ -107,7 +108,7 @@ public static class Program
         string masterPassword = GetPassword("Enter your master password: ");
         string secretKeyInput = GetPassword("Enter your secret key: ", "No key provided.");
 
-        SecretKey secretKey = new(Encoding.Unicode.GetBytes(secretKeyInput));
+        SecretKey secretKey = new(Convert.FromBase64String(secretKeyInput));
         VaultKey vaultKey = new(masterPassword, secretKey);
         Server? server = Server.ReadFromFile(serverPath, vaultKey);
         if (server == null) return;
@@ -187,7 +188,8 @@ public static class Program
             string? password = server.Vault.Get(prop);
             if (password != null)
             {
-                Console.WriteLine($"Password for {prop}: {password}");
+                Console.WriteLine($"Password for {prop}: ");
+                Console.WriteLine(password);
             }
         }
         else
@@ -241,7 +243,8 @@ public static class Program
         Client? client = Client.ReadFromFile(args[0]);
         if (client == null) return;
 
-        Console.WriteLine($"Secret key: {client.SecretKey}");
+        Console.WriteLine(client.SecretKey);
+        Console.WriteLine("↑ Your secret key ↑");
     }
 
     static void Change(string[] args)

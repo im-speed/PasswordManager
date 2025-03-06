@@ -56,7 +56,7 @@ public class Vault
             encryptedVault = msEncrypt.ToArray();
         }
 
-        return Encoding.Unicode.GetString(encryptedVault);
+        return Convert.ToBase64String(encryptedVault);
     }
 
     /// <summary>

@@ -27,7 +27,7 @@ public class Client()
 
         return new()
         {
-            SecretKey = new(Encoding.Unicode.GetBytes(jsonClient.SecretKey))
+            SecretKey = new(Convert.FromBase64String(jsonClient.SecretKey))
         };
     }
 
