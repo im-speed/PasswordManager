@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json;
 using PasswordManager.JsonClasses;
 using PasswordManager.Keys;
