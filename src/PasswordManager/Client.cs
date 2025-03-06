@@ -14,9 +14,11 @@ public class Client()
     internal static Client? ReadFromFile(string path)
     {
         JsonClient jsonClient;
+        SecretKey secretKey;
         try
         {
             jsonClient = JsonSerializer.Deserialize<JsonClient>(File.ReadAllText(path))!;
+            secretKey = new(jsonClient.SecretKey);
         }
         catch (Exception)
         {
@@ -26,7 +28,7 @@ public class Client()
 
         return new()
         {
-            SecretKey = new(Convert.FromBase64String(jsonClient.SecretKey))
+            SecretKey = secretKey
         };
     }
 

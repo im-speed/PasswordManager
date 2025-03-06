@@ -17,9 +17,22 @@ public class SecretKey
         Bytes = key;
     }
 
-    public SecretKey(byte[] secretKey)
+    public SecretKey(string secretKey)
     {
-        Bytes = secretKey;
+        Bytes = Convert.FromBase64String(secretKey);
+    }
+
+    public static SecretKey? FromString(string secretKey)
+    {
+        try
+        {
+            return new SecretKey(secretKey);
+        }
+        catch (Exception)
+        {
+            Console.WriteLine("Invalid secret key.");
+            return null;
+        }
     }
 
     public override string ToString() => Convert.ToBase64String(Bytes);

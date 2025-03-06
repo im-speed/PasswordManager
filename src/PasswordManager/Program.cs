@@ -18,8 +18,23 @@ public static class Program
         { "change", Change },
     };
 
+    public static bool IsBase64Valid(string base64String)
+    {
+        // We create a span of bytes with the same length as the input string
+        Span<byte> buffer = new(new byte[base64String.Length]);
+
+        // We attempt to parse the Base64 string into bytes using TryFromBase64String
+        // This method returns true if successful and false otherwise
+        bool isValid = Convert.TryFromBase64String(base64String, buffer, out _);
+
+        // We return the result indicating whether the string is a valid Base64 encoding
+        return isValid;
+    }
+
     public static void Main(string[] args)
     {
+        args = ["create", "client.json", "server.json"];
+
         if (args.Length == 0)
         {
             Console.WriteLine("No command provided");
@@ -107,7 +122,9 @@ public static class Program
         string masterPassword = GetPassword("Enter your master password: ");
         string secretKeyInput = GetPassword("Enter your secret key: ", "No key provided.");
 
-        SecretKey secretKey = new(Convert.FromBase64String(secretKeyInput));
+        SecretKey? secretKey = SecretKey.FromString(secretKeyInput);
+        if (secretKey == null) return;
+
         VaultKey vaultKey = new(masterPassword, secretKey);
         Server? server = Server.ReadFromFile(serverPath, vaultKey);
         if (server == null) return;
