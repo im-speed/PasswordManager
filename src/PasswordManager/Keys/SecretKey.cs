@@ -22,6 +22,4 @@ public class SecretKey
     {
         Bytes = secretKey;
     }
-
-    public override string ToString() => Convert.ToBase64String(Bytes);
 }

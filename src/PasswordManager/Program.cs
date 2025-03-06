@@ -10,6 +10,7 @@ public static class Program
     static Dictionary<string, Action<string[]>> Commands { get; } = new()
     {
         { "init", Init },
+        { "create", Create },
         { "set", Set },
     };
 
@@ -37,7 +38,11 @@ public static class Program
     /// Prompts the user for a password and returns it.
     /// </summary>
     /// <param name="prompt">The prompt to display before reading the password.</param>
-    static string GetPassword(string prompt = "Enter password: ")
+    /// <param name="nullWarning">The text to display if the password is null.</param>
+    static string GetPassword(
+        string prompt,
+        string nullWarning = "No password provided."
+    )
     {
         while (true)
         {
@@ -46,7 +51,7 @@ public static class Program
 
             if (string.IsNullOrEmpty(password))
             {
-                Console.WriteLine("No password provided.");
+                Console.WriteLine(nullWarning);
                 continue;
             }
 
@@ -65,7 +70,7 @@ public static class Program
         string clientPath = args[0];
         string serverPath = args[1];
 
-        string masterPassword = GetPassword("Enter master password: ");
+        string masterPassword = GetPassword("Enter new master password: ");
 
         SecretKey secretKey = new();
 
@@ -83,6 +88,32 @@ public static class Program
         server.WriteToFile(serverPath, vaultKey);
     }
 
+    static void Create(string[] args)
+    {
+        if (args.Length != 2)
+        {
+            Console.WriteLine("Not enough arguments. Usage: create <client> <server>");
+            return;
+        }
+
+        string clientPath = args[0];
+        string serverPath = args[1];
+
+        string masterPassword = GetPassword("Enter your master password: ");
+        string secretKeyInput = GetPassword("Enter your secret key: ", "No key provided.");
+
+        SecretKey secretKey = new(Convert.FromBase64String(secretKeyInput));
+        VaultKey vaultKey = new(masterPassword, secretKey);
+        Server? server = Server.ReadFromFile(serverPath, vaultKey);
+        if (server == null) return;
+
+        Client client = new()
+        {
+            SecretKey = secretKey
+        };
+        client.WriteToFile(clientPath);
+    }
+
     static void Set(string[] args)
     {
         if (args.Length < 3)
@@ -91,28 +122,28 @@ public static class Program
             return;
         }
 
+        string clientPath = args[0];
+        string serverPath = args[1];
+        string prop = args[2];
+
         bool shouldGenerate = false;
         if (args.Length > 3)
         {
             shouldGenerate = args[3] == "-g" || args[3] == "--generate";
         }
 
-        string masterPassword = GetPassword("Enter master password: ");
+        string masterPassword = GetPassword("Enter your master password: ");
 
         string password;
         if (shouldGenerate)
         {
             password = RandomNumberGenerator.GetString(alphaNumerics, 20);
-            Console.WriteLine("Generated password: " + password);
+            Console.WriteLine($"Generated password for {prop}: {password}");
         }
         else
         {
-            password = GetPassword();
+            password = GetPassword($"Enter new password for {prop}: ");
         }
-
-        string clientPath = args[0];
-        string serverPath = args[1];
-        string prop = args[2];
 
         Client? client = Client.ReadFromFile(clientPath);
         if (client == null) return;
