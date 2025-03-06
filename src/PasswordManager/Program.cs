@@ -33,8 +33,6 @@ public static class Program
 
     public static void Main(string[] args)
     {
-        args = ["create", "client.json", "server.json"];
-
         if (args.Length == 0)
         {
             Console.WriteLine("No command provided");
