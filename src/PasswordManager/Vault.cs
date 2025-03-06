@@ -39,21 +39,21 @@ public class Vault
 
         string vaultJson = JsonSerializer.Serialize(Values);
 
-        using (Aes aesAlg = Aes.Create())
+        using (Aes aes = Aes.Create())
         {
-            aesAlg.Key = Key.Bytes;
-            aesAlg.IV = IV;
+            aes.Key = Key.Bytes;
+            aes.IV = IV;
 
-            ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
+            ICryptoTransform cryptoTransform = aes.CreateEncryptor(aes.Key, aes.IV);
 
-            using MemoryStream msEncrypt = new();
-            using (CryptoStream csEncrypt = new(msEncrypt, encryptor, CryptoStreamMode.Write))
+            using MemoryStream memoryStream = new();
+            using (CryptoStream cryptoStream = new(memoryStream, cryptoTransform, CryptoStreamMode.Write))
             {
-                using StreamWriter swEncrypt = new(csEncrypt);
-                swEncrypt.Write(vaultJson);
+                using StreamWriter streamWriter = new(cryptoStream, Encoding.Unicode);
+                streamWriter.Write(vaultJson);
             }
 
-            encryptedVault = msEncrypt.ToArray();
+            encryptedVault = memoryStream.ToArray();
         }
 
         return Convert.ToBase64String(encryptedVault);
@@ -68,20 +68,20 @@ public class Vault
     public static Vault? Decrypt(byte[] encryptedVault, VaultKey Key, byte[] IV)
     {
         Dictionary<string, string> decryptedValues;
-        using (Aes aesAlg = Aes.Create())
+        using (Aes aes = Aes.Create())
         {
-            aesAlg.Key = Key.Bytes;
-            aesAlg.IV = IV;
+            aes.Key = Key.Bytes;
+            aes.IV = IV;
 
-            ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+            ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
 
-            using MemoryStream msDecrypt = new(encryptedVault);
-            using CryptoStream csDecrypt = new(msDecrypt, decryptor, CryptoStreamMode.Read);
-            using StreamReader srDecrypt = new(csDecrypt);
+            using MemoryStream memoryStream = new(encryptedVault);
+            using CryptoStream cryptoStream = new(memoryStream, decryptor, CryptoStreamMode.Read);
+            using StreamReader streamReader = new(cryptoStream, Encoding.Unicode);
 
             try
             {
-                decryptedValues = JsonSerializer.Deserialize<Dictionary<string, string>>(srDecrypt.ReadToEnd())!;
+                decryptedValues = JsonSerializer.Deserialize<Dictionary<string, string>>(streamReader.ReadToEnd())!;
             }
             catch (Exception)
             {
