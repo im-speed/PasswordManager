@@ -225,4 +225,29 @@ public static class Program
             Console.WriteLine($"The property '{prop}' does not exist.");
         }
     }
+    static void Change(string[] args)
+    {
+        if (args.Length < 2)
+        {
+            Console.WriteLine("Not enough arguments. Usage: change <client> <server>");
+            return;
+        }
+
+        string clientPath = args[0];
+        string serverPath = args[1];
+
+        string masterPassword = GetPassword("Enter your master password: ");
+
+        Client? client = Client.ReadFromFile(clientPath);
+        if (client == null) return;
+
+        VaultKey vaultKey = new(masterPassword, client.SecretKey);
+        Server? server = Server.ReadFromFile(serverPath, vaultKey);
+        if (server == null) return;
+
+        string newPassword = GetPassword("Enter new master password: ");
+        VaultKey newVaultKey = new(newPassword, client.SecretKey);
+
+        server.WriteToFile(serverPath, newVaultKey);
+    }
 }
