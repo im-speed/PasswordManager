@@ -13,7 +13,8 @@ public static class Program
         { "create", Create },
         { "set", Set },
         { "get", Get },
-        { "delete", Delete }
+        { "delete", Delete },
+        { "secret", Secret }
     };
 
     public static void Main(string[] args)
@@ -65,7 +66,7 @@ public static class Program
     {
         if (args.Length != 2)
         {
-            Console.WriteLine("Not enough arguments. Usage: init <client> <server>");
+            Console.WriteLine("Incorrect amount of arguments. Usage: init <client> <server>");
             return;
         }
 
@@ -94,7 +95,7 @@ public static class Program
     {
         if (args.Length != 2)
         {
-            Console.WriteLine("Not enough arguments. Usage: create <client> <server>");
+            Console.WriteLine("Incorrect amount of arguments. Usage: create <client> <server>");
             return;
         }
 
@@ -118,9 +119,9 @@ public static class Program
 
     static void Set(string[] args)
     {
-        if (args.Length < 3)
+        if (args.Length < 3 || args.Length > 4)
         {
-            Console.WriteLine("Not enough arguments. Usage: set <client> <server> <prop>");
+            Console.WriteLine("Incorrect amount of arguments. Usage: set <client> <server> <prop> [-g]");
             return;
         }
 
@@ -129,7 +130,7 @@ public static class Program
         string prop = args[2];
 
         bool shouldGenerate = false;
-        if (args.Length > 3)
+        if (args.Length == 4)
         {
             shouldGenerate = args[3] == "-g" || args[3] == "--generate";
         }
@@ -160,15 +161,15 @@ public static class Program
 
     static void Get(string[] args)
     {
-        if (args.Length < 2)
+        if (args.Length < 2 || args.Length > 3)
         {
-            Console.WriteLine("Not enough arguments. Usage: get <client> <server> [<prop>]");
+            Console.WriteLine("Incorrect amount of arguments. Usage: get <client> <server> [<prop>]");
             return;
         }
 
         string clientPath = args[0];
         string serverPath = args[1];
-        string? prop = args.Length > 2 ? args[2] : null;
+        string? prop = args.Length == 3 ? args[2] : null;
 
         string masterPassword = GetPassword("Enter your master password: ");
 
@@ -198,7 +199,7 @@ public static class Program
     {
         if (args.Length != 3)
         {
-            Console.WriteLine("Not enough arguments. Usage: delete <client> <server> <prop>");
+            Console.WriteLine("Incorrect amount of arguments. Usage: delete <client> <server> <prop>");
             return;
         }
 
@@ -224,5 +225,19 @@ public static class Program
         {
             Console.WriteLine($"The property '{prop}' does not exist.");
         }
+    }
+
+    static void Secret(string[] args)
+    {
+        if (args.Length != 1)
+        {
+            Console.WriteLine("Incorrect amount of arguments. Usage: secret <client>");
+            return;
+        }
+
+        Client? client = Client.ReadFromFile(args[0]);
+        if (client == null) return;
+
+        Console.WriteLine($"Secret key: {client.SecretKey.String}");
     }
 }
