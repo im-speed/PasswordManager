@@ -206,13 +206,16 @@ public class IntegrationTests
         string prop = "some arbitrary prop";
         string data = "some arbitrary data";
 
+        // Setup vault and store a password to retrieve later.
         init(clientPath1, serverPath, pwd1);
         set(clientPath1, serverPath, pwd1, prop, data);
         change(clientPath1, serverPath, pwd1, pwd2);
 
+        // Try to retrieve data with new master password.
         string response1 = get(clientPath1, serverPath, pwd2, prop).Split(Environment.NewLine)[^1];
         Assert.AreEqual(data, response1, "Could not retrieve data with new master password after changing.");
 
+        // Try to retrieve data with old master password.
         string response2 = get(clientPath1, serverPath, pwd1, prop).Split(Environment.NewLine)[^1];
         Assert.AreNotEqual(data, response2, "Could retrieve data with old master password after changing.");
     }

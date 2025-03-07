@@ -22,6 +22,10 @@ public class SecretKey
         Bytes = Convert.FromBase64String(secretKey);
     }
 
+    /// <summary>
+    /// Tries to create a new secret key class from a secret key string.
+    /// </summary>
+    /// <returns>A new secret key class or null if the string could not be parsed.</returns>
     public static SecretKey? FromString(string secretKey)
     {
         try
