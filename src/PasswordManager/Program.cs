@@ -76,6 +76,28 @@ public static class Program
         }
     }
 
+    static bool ClientExist(string clientPath)
+    {
+        if (!File.Exists(clientPath))
+        {
+            Console.WriteLine($"Client file '{clientPath}' does not exist.");
+            return false;
+        }
+
+        return true;
+    }
+
+    static bool ServerExist(string serverPath)
+    {
+        if (!File.Exists(serverPath))
+        {
+            Console.WriteLine($"Server file '{serverPath}' does not exist.");
+            return false;
+        }
+
+        return true;
+    }
+
     static void Init(string[] args)
     {
         if (args.Length != 2)
@@ -114,8 +136,10 @@ public static class Program
             return;
         }
 
-        string clientPath = args[0];
+        string newClientPath = args[0];
         string serverPath = args[1];
+
+        if (!ServerExist(serverPath)) return;
 
         string masterPassword = GetPassword("Enter your master password: ");
         string secretKeyInput = GetPassword("Enter your secret key: ", "No key provided.");
@@ -131,7 +155,7 @@ public static class Program
         {
             SecretKey = secretKey
         };
-        client.WriteToFile(clientPath);
+        client.WriteToFile(newClientPath);
     }
 
     static void Set(string[] args)
@@ -145,6 +169,9 @@ public static class Program
         string clientPath = args[0];
         string serverPath = args[1];
         string prop = args[2];
+
+        if (!ClientExist(clientPath)) return;
+        if (!ServerExist(serverPath)) return;
 
         bool shouldGenerate = false;
         if (args.Length == 4)
@@ -188,6 +215,9 @@ public static class Program
         string serverPath = args[1];
         string? prop = args.Length == 3 ? args[2] : null;
 
+        if (!ClientExist(clientPath)) return;
+        if (!ServerExist(serverPath)) return;
+
         string masterPassword = GetPassword("Enter your master password: ");
 
         Client? client = Client.ReadFromFile(clientPath);
@@ -226,6 +256,9 @@ public static class Program
         string serverPath = args[1];
         string prop = args[2];
 
+        if (!ClientExist(clientPath)) return;
+        if (!ServerExist(serverPath)) return;
+
         string masterPassword = GetPassword("Enter your master password: ");
 
         Client? client = Client.ReadFromFile(clientPath);
@@ -254,6 +287,10 @@ public static class Program
             return;
         }
 
+        string clientPath = args[0];
+
+        if (!ClientExist(clientPath)) return;
+
         Client? client = Client.ReadFromFile(args[0]);
         if (client == null) return;
 
@@ -271,6 +308,9 @@ public static class Program
 
         string clientPath = args[0];
         string serverPath = args[1];
+
+        if (!ClientExist(clientPath)) return;
+        if (!ServerExist(serverPath)) return;
 
         string masterPassword = GetPassword("Enter your master password: ");
 
