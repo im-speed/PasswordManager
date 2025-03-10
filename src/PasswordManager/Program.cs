@@ -18,19 +18,6 @@ public static class Program
         { "change", Change },
     };
 
-    public static bool IsBase64Valid(string base64String)
-    {
-        // We create a span of bytes with the same length as the input string
-        Span<byte> buffer = new(new byte[base64String.Length]);
-
-        // We attempt to parse the Base64 string into bytes using TryFromBase64String
-        // This method returns true if successful and false otherwise
-        bool isValid = Convert.TryFromBase64String(base64String, buffer, out _);
-
-        // We return the result indicating whether the string is a valid Base64 encoding
-        return isValid;
-    }
-
     public static void Main(string[] args)
     {
         if (args.Length == 0)
